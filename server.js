@@ -29,7 +29,7 @@ router.route('/food/:food_id')
                 request({
                     url: 'https://api.nutritionix.com/v1_1/item?id=' + foodId + '&appId=f0198a4a&appKey=40ebd8830ab41d47ff4f6989420a3c07',
                     json: true
-                }, function (err, res1, json2) {
+                }, function (err, res, json2) {
                     if (err) {
                         throw err;
                     } else {
