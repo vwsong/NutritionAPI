@@ -27,8 +27,8 @@ router.route('/food/:food_id')
                 foodId = json1.hits[0].fields.item_id;
                 console.log(json1.hits[0].fields.item_id);
                 res1.json({
-                    id: foodId
-                    name: Hello
+                    id: foodId,
+                    message: "hello"
                 });
             }
         });
