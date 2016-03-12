@@ -33,10 +33,43 @@ router.route('/food/:food_id')
                     if (err) {
                         throw err;
                     } else {
+                        item = json2.item_name;
                         calories = json2.nf_calories;
+                        fatCalories = json2.nf_calories_from_fat;
+                        totalFat = json2.nf_total_fat;
+                        saturatedFat = json2.nf_saturated_fat;
+                        polyFat = json2.nf_polyunsaturated_fat;
+                        monoFat = json2.nf_monosaturated_fat;
+                        cholesterol = json2.nf_cholesterol;
+                        carbohydrates = json2.nf_total_carbohydrate;
+                        fiber = json2.nf_dietary_fiber;
+                        sugar = json2.nf_sugars;
+                        protein = json2.nf_protein;
+                        vitaminA = json2.nf_vitamin_a_dv;
+                        vitaminC = json2.nf_vitamin_c_dv;
+                        calcium = json2.nf_calcium_dv;
+                        iron = json2.nf_iron_dv;
+                        servingsPerContainer = json2.nf_servings_per_container;
+                        servingSize = json2.nf_serving_size_qty;
+                        sizeUnit = json2.nf_serving_size_unit;
+                        
                         console.log(json2.nf_calories);
                         res1.json({
-                            calories: calories
+                            name: item,
+                            calories: calories,
+                            fatCalories: fatCalories,
+                            totalFat: totalFat,
+                            saturatedFat: saturatedFat,
+                            polyFat: polyFat,
+                            monoFat: monoFat,
+                            cholersterol: cholesterol,
+                            fiber: fiber,
+                            sugar: sugar,
+                            protein: protein,
+                            vitaminA: vitaminA,
+                            vitaminC: vitaminC,
+                            calcium: calcium,
+                            iron: iron,
                         });
                     }
                 });
