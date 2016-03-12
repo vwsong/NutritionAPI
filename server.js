@@ -12,6 +12,7 @@ var port = process.env.PORT || 8080;
 
 var request = require('request');
 
+var routerInputs = express.Router();
 var router = express.Router();
 
 router.route('/food/:food_id')
