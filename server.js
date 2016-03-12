@@ -26,9 +26,19 @@ router.route('/food/:food_id')
             } else {
                 foodId = json1.hits[0].fields.item_id;
                 console.log(json1.hits[0].fields.item_id);
-                res1.json({
-                    id: foodId,
-                    message: "hello"
+                request({
+                    url: 'https://api.nutritionix.com/v1_1/item?id=' + foodId + '&appId=f0198a4a&appKey=40ebd8830ab41d47ff4f6989420a3c07',
+                    json: true
+                }, function (err, res1, json2) {
+                    if (err) {
+                        throw err;
+                    } else {
+                        calories = json2.nf_calories;
+                        console.log(json2.nf_calories);
+                        res1.json({
+                            calories: calories
+                        });
+                    }
                 });
             }
         });
