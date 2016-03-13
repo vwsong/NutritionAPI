@@ -1,12 +1,17 @@
 var express = require('express'); // call express
 var http = require("http");
-var app = express();
 var bodyParser = require('body-parser');
+var Firebase = require("firebase");
+var myFirebaseRef = new Firebase("https://incandescent-fire-6785.firebaseio.com/");
+var app = express();
 
 app.use(bodyParser.urlencoded({
     extended: true
 }));
 app.use(bodyParser.json());
+
+var appID = 'f0198a4a';
+var appKey = '1c0db97504469966dd4aab4850e32c4e';
 
 var port = process.env.PORT || 8080;
 
@@ -15,11 +20,29 @@ var request = require('request');
 var routerInputs = express.Router();
 var router = express.Router();
 
-router.route('/food/:food_id')
+routerInputs = express.Router();
+routerInputs.route('/test/:user_id').get(function (req, res1) {
+    var id = req.params.user_id;
+    myFirebaseRef.child(id).set({
+        id: {
+            city: "San Francisco",
+            state: "California",
+            zip: 94103
+        }
+    });
+    myFirebaseRef.child("location/city").on("value", function (snapshot) {
+        console.log(snapshot.val()); // Alerts "San Francisco"
+    });
+    res1.json({
+        test: "hello"
+    });
+});
+
+router.route('/food/:food_id/')
     .get(function (req, res1) {
         var foodId = 0;
         request({
-            url: 'https://api.nutritionix.com/v1_1/search/+' + req.params.food_id + '?results=0%3A20&cal_min=0&cal_max=50000&fields=item_name%2Cbrand_name%2Citem_id%2Cbrand_id&appId=f0198a4a&appKey=40ebd8830ab41d47ff4f6989420a3c07',
+            url: 'https://api.nutritionix.com/v1_1/search/+' + req.params.food_id + '?results=0%3A20&cal_min=0&cal_max=50000&fields=item_name%2Cbrand_name%2Citem_id%2Cbrand_id&appId=' + appID + '&appKey=' + appKey,
             json: true
         }, function (err, res, json1) {
             if (err) {
@@ -28,7 +51,7 @@ router.route('/food/:food_id')
                 foodId = json1.hits[0].fields.item_id;
                 console.log(json1.hits[0].fields.item_id);
                 request({
-                    url: 'https://api.nutritionix.com/v1_1/item?id=' + foodId + '&appId=f0198a4a&appKey=40ebd8830ab41d47ff4f6989420a3c07',
+                    url: 'https://api.nutritionix.com/v1_1/item?id=' + foodId + '&appId=' + appID + '&appKey=' + appKey,
                     json: true
                 }, function (err, res, json2) {
                     if (err) {
@@ -53,7 +76,7 @@ router.route('/food/:food_id')
                         servingsPerContainer = json2.nf_servings_per_container;
                         servingSize = json2.nf_serving_size_qty;
                         sizeUnit = json2.nf_serving_size_unit;
-                        
+
                         console.log(json2.nf_calories);
                         res1.json({
                             name: item,
@@ -80,6 +103,7 @@ router.route('/food/:food_id')
     });
 
 app.use('/api', router);
+app.use('/api', routerInputs);
 
 app.listen(port);
 console.log('We are at' + port);
