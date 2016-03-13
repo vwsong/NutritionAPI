@@ -10,8 +10,8 @@ app.use(bodyParser.urlencoded({
 }));
 app.use(bodyParser.json());
 
-var appID = 'f0198a4a';
-var appKey = '1c0db97504469966dd4aab4850e32c4e';
+var appID = '235a8c0f';
+var appKey = 'd4c15742a3e03ec8b11ccb91e287126e';
 
 var port = process.env.PORT || 8080;
 
@@ -23,14 +23,7 @@ var router = express.Router();
 routerInputs = express.Router();
 routerInputs.route('/test/:user_id').get(function (req, res1) {
     var id = req.params.user_id;
-    myFirebaseRef.child(id).set({
-        id: {
-            city: "San Francisco",
-            state: "California",
-            zip: 94103
-        }
-    });
-    myFirebaseRef.child("location/city").on("value", function (snapshot) {
+    myFirebaseRef.child("Vincent/calories").on("value", function (snapshot) {
         console.log(snapshot.val()); // Alerts "San Francisco"
     });
     res1.json({
@@ -38,25 +31,30 @@ routerInputs.route('/test/:user_id').get(function (req, res1) {
     });
 });
 
-router.route('/food/:food_id/')
+router.route('/food/:food_id/:user_id')
     .get(function (req, res1) {
         var foodId = 0;
+        var id = req.params.user_id;
         request({
             url: 'https://api.nutritionix.com/v1_1/search/+' + req.params.food_id + '?results=0%3A20&cal_min=0&cal_max=50000&fields=item_name%2Cbrand_name%2Citem_id%2Cbrand_id&appId=' + appID + '&appKey=' + appKey,
             json: true
         }, function (err, res, json1) {
             if (err) {
-                throw err;
+                res1.json({
+                    error: 400
+                });
             } else {
-                foodId = json1.hits[0].fields.item_id;
-                console.log(json1.hits[0].fields.item_id);
-                request({
-                    url: 'https://api.nutritionix.com/v1_1/item?id=' + foodId + '&appId=' + appID + '&appKey=' + appKey,
-                    json: true
-                }, function (err, res, json2) {
-                    if (err) {
-                        throw err;
-                    } else {
+                if (json1.total_hits == 0) {
+                    res1.json({
+                        error: 400
+                    });
+                } else {
+                    foodId = json1.hits[0].fields.item_id;
+                    console.log(json1.hits[0].fields.item_id);
+                    request({
+                        url: 'https://api.nutritionix.com/v1_1/item?id=' + foodId + '&appId=' + appID + '&appKey=' + appKey,
+                        json: true
+                    }, function (err, res, json2) {
                         item = json2.item_name;
                         calories = json2.nf_calories;
                         fatCalories = json2.nf_calories_from_fat;
@@ -78,7 +76,32 @@ router.route('/food/:food_id/')
                         sizeUnit = json2.nf_serving_size_unit;
 
                         console.log(json2.nf_calories);
+//                        myFirebaseRef.on("value", function (snapshot) {
+//                            if (snapshot.child("Vincent").exists()) {
+//                                var user = snapshot.val();
+//                                console.log(snapshot.child("Vincent/calories"));
+//                                myFirebaseRef.child(id).set({
+//                                    name: item,
+//                                    calories: calories,
+//                                    fatCalories: fatCalories,
+//                                    totalFat: totalFat,
+//                                    saturatedFat: saturatedFat,
+//                                    polyFat: polyFat
+//                                });
+//                            } else {
+//                              myFirebaseRef.child(id).set({
+//                                    name: item,
+//                                    calories: calories,
+//                                    fatCalories: fatCalories,
+//                                    totalFat: totalFat,
+//                                    saturatedFat: saturatedFat,
+//                                    polyFat: polyFat
+//                                });
+//                            }
+//                        });
+
                         res1.json({
+                            error: null,
                             name: item,
                             calories: calories,
                             fatCalories: fatCalories,
@@ -95,8 +118,8 @@ router.route('/food/:food_id/')
                             calcium: calcium,
                             iron: iron,
                         });
-                    }
-                });
+                    });
+                }
             }
         });
 
