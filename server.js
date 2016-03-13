@@ -2,6 +2,7 @@ var express = require('express'); // call express
 var http = require("http");
 var bodyParser = require('body-parser');
 var Firebase = require("firebase");
+var request = require('request');
 var myFirebaseRef = new Firebase("https://incandescent-fire-6785.firebaseio.com/");
 var app = express();
 
@@ -15,22 +16,64 @@ var appKey = 'd4c15742a3e03ec8b11ccb91e287126e';
 
 var port = process.env.PORT || 8080;
 
-var request = require('request');
-
-var routerInputs = express.Router();
-var router = express.Router();
-
-routerInputs = express.Router();
-routerInputs.route('/test/:user_id').get(function (req, res1) {
+var routerDelete = express.Router();
+var routerDelete = express.Router();
+routerDelete.route('/delete/:user_id').get(function (req, res1) {
     var id = req.params.user_id;
-    myFirebaseRef.child("Vincent/calories").on("value", function (snapshot) {
-        console.log(snapshot.val()); // Alerts "San Francisco"
+    myFirebaseRef.once("value", function (snapshot) {
+        if (snapshot.child(id).exists()) {
+            myFirebaseRef.child(id).remove();
+            res1.json({
+                removed: true
+            });
+        } else {
+            res1.json({
+                removed: false
+            });
+        }
     });
-    res1.json({
-        test: "hello"
-    });
+
 });
 
+var routerInputs = express.Router();
+routerInputs.route('/info/:user_id').get(function (req, res1) {
+    var id = req.params.user_id;
+    myFirebaseRef.once("value", function (snapshot) {
+        if (snapshot.child(id).exists()) {
+            var addCal = snapshot.child(id + "/calories").val();
+            var addTF = snapshot.child(id + "/totalFat").val();
+            var addChol = snapshot.child(id + "/cholersterol").val();
+            var addFiber = snapshot.child(id + "/fiber").val();
+            var addSugar = snapshot.child(id + "/sugar").val();
+            var addProtein = snapshot.child(id + "/protein").val();
+            var addVA = snapshot.child(id + "/vitaminA").val();
+            var addVC = snapshot.child(id + "/vitaminC").val();
+            var addC = snapshot.child(id + "/calcium").val();
+            var addIron = snapshot.child(id + "/iron").val();
+            var foods = snapshot.child(id + "/foods").val();
+            res1.json({
+                User: id,
+                calories: addCal,
+                cholesterol: addChol,
+                fiber: addFiber,
+                sugar: addSugar,
+                protein: addProtein,
+                vitaminA: addVA,
+                vitaminC: addVC,
+                calcium: addC,
+                iron: addIron,
+                count: foods
+            });
+        } else {
+            res1.json({
+                error: 1
+            });
+        }
+    });
+
+});
+
+var router = express.Router();
 router.route('/food/:food_id/:user_id')
     .get(function (req, res1) {
         var foodId = 0;
@@ -55,47 +98,81 @@ router.route('/food/:food_id/:user_id')
                         url: 'https://api.nutritionix.com/v1_1/item?id=' + foodId + '&appId=' + appID + '&appKey=' + appKey,
                         json: true
                     }, function (err, res, json2) {
-                        item = json2.item_name;
-                        calories = json2.nf_calories;
-                        fatCalories = json2.nf_calories_from_fat;
-                        totalFat = json2.nf_total_fat;
-                        saturatedFat = json2.nf_saturated_fat;
-                        polyFat = json2.nf_polyunsaturated_fat;
-                        monoFat = json2.nf_monosaturated_fat;
-                        cholesterol = json2.nf_cholesterol;
-                        carbohydrates = json2.nf_total_carbohydrate;
-                        fiber = json2.nf_dietary_fiber;
-                        sugar = json2.nf_sugars;
-                        protein = json2.nf_protein;
-                        vitaminA = json2.nf_vitamin_a_dv;
-                        vitaminC = json2.nf_vitamin_c_dv;
-                        calcium = json2.nf_calcium_dv;
-                        iron = json2.nf_iron_dv;
-                        servingsPerContainer = json2.nf_servings_per_container;
-                        servingSize = json2.nf_serving_size_qty;
-                        sizeUnit = json2.nf_serving_size_unit;
-//                        myFirebaseRef.on("value", function (snapshot) {
-//                            if (snapshot.child(id).exists()) {
-//                                var user = snapshot.val();
-//                                console.log(snapshot.child(id + "/calories").val());
-//                                myFirebaseRef.child(id).set({
-//                                    calories: snapshot.child(id + "/calories").val()+calories,
-//                                    fatCalories: fatCalories,
-//                                    totalFat: totalFat,
-//                                    saturatedFat: saturatedFat,
-//                                    polyFat: polyFat
-//                                });
-//                            } else {
-//                                myFirebaseRef.child(id).set({
-//                                    name: item,
-//                                    calories: calories,
-//                                    fatCalories: fatCalories,
-//                                    totalFat: totalFat,
-//                                    saturatedFat: saturatedFat,
-//                                    polyFat: polyFat
-//                                });
-//                            }
-//                        });
+                        var item = json2.item_name;
+                        var calories = json2.nf_calories;
+                        var fatCalories = json2.nf_calories_from_fat;
+                        var totalFat = json2.nf_total_fat;
+                        var saturatedFat = json2.nf_saturated_fat;
+                        var polyFat = json2.nf_polyunsaturated_fat;
+                        var monoFat = json2.nf_monosaturated_fat;
+                        var cholesterol = json2.nf_cholesterol;
+                        var carbohydrates = json2.nf_total_carbohydrate;
+                        var fiber = json2.nf_dietary_fiber;
+                        var sugar = json2.nf_sugars;
+                        var protein = json2.nf_protein;
+                        var vitaminA = json2.nf_vitamin_a_dv;
+                        var vitaminC = json2.nf_vitamin_c_dv;
+                        var calcium = json2.nf_calcium_dv;
+                        var iron = json2.nf_iron_dv;
+                        var servingsPerContainer = json2.nf_servings_per_container;
+                        var servingSize = json2.nf_serving_size_qty;
+                        var sizeUnit = json2.nf_serving_size_unit;
+
+                        myFirebaseRef.once("value", function (snapshot) {
+                            if (snapshot.child(id).exists()) {
+                                var user = snapshot.val();
+                                console.log(snapshot.child(id + "/calories").val());
+                                var addCal = snapshot.child(id + "/calories").val();
+                                var addTF = snapshot.child(id + "/totalFat").val();
+                                var addChol = snapshot.child(id + "/cholersterol").val();
+                                var addFiber = snapshot.child(id + "/fiber").val();
+                                var addSugar = snapshot.child(id + "/sugar").val();
+                                var addProtein = snapshot.child(id + "/protein").val();
+                                var addVA = snapshot.child(id + "/vitaminA").val();
+                                var addVC = snapshot.child(id + "/vitaminC").val();
+                                var addC = snapshot.child(id + "/calcium").val();
+                                var addIron = snapshot.child(id + "/iron").val();
+                                var foods = snapshot.child(id + "/foods").val();
+                                foods++;
+                                calories += addCal;
+                                totalFat += totalFat;
+                                cholesterol += addChol;
+                                fiber += addFiber;
+                                sugar += addSugar;
+                                protein += addProtein;
+                                vitaminA += addVA;
+                                vitaminC += addVC;
+                                calcium += addC;
+                                iron += addIron;
+                                myFirebaseRef.child(id).set({
+                                    foods: foods,
+                                    calories: calories,
+                                    totalFat: totalFat,
+                                    cholersterol: cholesterol,
+                                    fiber: fiber,
+                                    sugar: sugar,
+                                    protein: protein,
+                                    vitaminA: vitaminA,
+                                    vitaminC: vitaminC,
+                                    calcium: calcium,
+                                    iron: iron
+                                });
+                            } else {
+                                myFirebaseRef.child(id).set({
+                                    foods: 0,
+                                    calories: calories,
+                                    totalFat: totalFat,
+                                    cholersterol: cholesterol,
+                                    fiber: fiber,
+                                    sugar: sugar,
+                                    protein: protein,
+                                    vitaminA: vitaminA,
+                                    vitaminC: vitaminC,
+                                    calcium: calcium,
+                                    iron: iron
+                                });
+                            }
+                        });
 
                         res1.json({
                             error: 0,
@@ -124,6 +201,7 @@ router.route('/food/:food_id/:user_id')
 
 app.use('/api', router);
 app.use('/api', routerInputs);
+app.use('/api', routerDelete);
 
 app.listen(port);
 console.log('We are at' + port);
