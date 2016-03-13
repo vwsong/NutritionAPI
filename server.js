@@ -41,12 +41,12 @@ router.route('/food/:food_id/:user_id')
         }, function (err, res, json1) {
             if (err) {
                 res1.json({
-                    error: 400
+                    error: 1
                 });
             } else {
                 if (json1.total_hits == 0) {
                     res1.json({
-                        error: 400
+                        error: 1
                     });
                 } else {
                     foodId = json1.hits[0].fields.item_id;
@@ -74,22 +74,19 @@ router.route('/food/:food_id/:user_id')
                         servingsPerContainer = json2.nf_servings_per_container;
                         servingSize = json2.nf_serving_size_qty;
                         sizeUnit = json2.nf_serving_size_unit;
-
-                        console.log(json2.nf_calories);
 //                        myFirebaseRef.on("value", function (snapshot) {
-//                            if (snapshot.child("Vincent").exists()) {
+//                            if (snapshot.child(id).exists()) {
 //                                var user = snapshot.val();
-//                                console.log(snapshot.child("Vincent/calories"));
+//                                console.log(snapshot.child(id + "/calories").val());
 //                                myFirebaseRef.child(id).set({
-//                                    name: item,
-//                                    calories: calories,
+//                                    calories: snapshot.child(id + "/calories").val()+calories,
 //                                    fatCalories: fatCalories,
 //                                    totalFat: totalFat,
 //                                    saturatedFat: saturatedFat,
 //                                    polyFat: polyFat
 //                                });
 //                            } else {
-//                              myFirebaseRef.child(id).set({
+//                                myFirebaseRef.child(id).set({
 //                                    name: item,
 //                                    calories: calories,
 //                                    fatCalories: fatCalories,
@@ -101,7 +98,7 @@ router.route('/food/:food_id/:user_id')
 //                        });
 
                         res1.json({
-                            error: null,
+                            error: 0,
                             name: item,
                             calories: calories,
                             fatCalories: fatCalories,
