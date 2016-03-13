@@ -52,6 +52,7 @@ routerInputs.route('/info/:user_id').get(function (req, res1) {
             var addIron = snapshot.child(id + "/iron").val();
             var foods = snapshot.child(id + "/foods").val();
             res1.json({
+                error: 0,
                 User: id,
                 calories: addCal,
                 cholesterol: addChol,
@@ -145,6 +146,7 @@ router.route('/food/:food_id/:user_id')
                                 calcium += addC;
                                 iron += addIron;
                                 myFirebaseRef.child(id).set({
+                                    error: 0,
                                     foods: foods,
                                     calories: calories,
                                     totalFat: totalFat,
@@ -159,6 +161,7 @@ router.route('/food/:food_id/:user_id')
                                 });
                             } else {
                                 myFirebaseRef.child(id).set({
+                                    error: 0,
                                     foods: 0,
                                     calories: calories,
                                     totalFat: totalFat,
